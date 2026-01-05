@@ -26,10 +26,11 @@
 
 // export default createAppContainer(switchNavigator);
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
+// import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -39,16 +40,21 @@ import SignupScreen from './src/screens/SignupScreen';
 import TrackCreateScreen from './src/screens/TrackCreateScreen';
 import TrackDetailScreen from './src/screens/TrackDetailScreen';
 import TrackListScreen from './src/screens/TrackListScreen';
+import { AuthContext, AuthProvider } from './src/context/AuthContext';
 
 // Stack navigatorlar
 const Stack = createNativeStackNavigator();
-const Tab = createMaterialBottomTabNavigator();
+const Tab = createBottomTabNavigator();
 
 // Login flow stack
 function LoginStack() {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="Signup" component={SignupScreen} />
+      <Stack.Screen
+        name="Signup"
+        component={SignupScreen}
+        options={{ headerShown: false }}
+      />
       <Stack.Screen name="Signin" component={SigninScreen} />
     </Stack.Navigator>
   );
@@ -69,22 +75,20 @@ function MainTabs() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
+        headerShown: false,
         tabBarIcon: ({ color, size }) => {
           let iconName;
           if (route.name === 'TrackListFlow') iconName = 'format-list-bulleted';
           if (route.name === 'TrackCreate') iconName = 'plus-box';
           if (route.name === 'Account') iconName = 'account';
+
           return (
             <MaterialCommunityIcons name={iconName} size={size} color={color} />
           );
         },
       })}
     >
-      <Tab.Screen
-        name="TrackListFlow"
-        component={TrackListStack}
-        options={{ title: 'Tracks' }}
-      />
+      <Tab.Screen name="TrackListFlow" component={TrackListStack} />
       <Tab.Screen name="TrackCreate" component={TrackCreateScreen} />
       <Tab.Screen name="Account" component={AccountScreen} />
     </Tab.Navigator>
@@ -92,12 +96,17 @@ function MainTabs() {
 }
 
 // Root navigator (switch navigator o‘rniga shartli stack)
-export default function App() {
-  const isLoggedIn = false; // Bu yerda authentikatsiya holatini boshqarasiz
+function RootNavigator() {
+  const { isLoggedIn } = useContext(AuthContext);
+  return isLoggedIn ? <MainTabs /> : <LoginStack />;
+}
 
+export default function App() {
   return (
-    <NavigationContainer>
-      {isLoggedIn ? <MainTabs /> : <LoginStack />}
-    </NavigationContainer>
+    <AuthProvider>
+      <NavigationContainer>
+        <RootNavigator />
+      </NavigationContainer>
+    </AuthProvider>
   );
 }
