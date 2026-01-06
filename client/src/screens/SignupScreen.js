@@ -5,7 +5,8 @@ import { Button, Input, Text } from 'react-native-elements';
 import Spacer from '../components/Spacer';
 
 const SignupScreen = ({ navigation }) => {
-  const { setIsLoggedIn } = useContext(AuthContext);
+  // const { setIsLoggedIn } = useContext(AuthContext);
+  const { state, signup } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   return (
@@ -30,7 +31,7 @@ const SignupScreen = ({ navigation }) => {
         autoCorrect={false}
       />
       <Spacer>
-        <Button title="Sign Up" />
+        <Button title="Sign Up" onPress={() => signup({ email, password })} />
       </Spacer>
     </View>
   );
